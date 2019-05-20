@@ -1,4 +1,4 @@
-# TDS
+# TDG
 
 ## 设计目标
 
@@ -85,11 +85,11 @@
           db.session.commit()
   ```
 
-- TDS 语法
+- TDG 语法
 
   ```python
-  # TDS grammar
-  tds.gen({
+  TDG
+  tdg.gen({
       'model': School,
       'items': [{
           'model': Grade,
@@ -172,7 +172,7 @@
 - 创建一条学校记录
 
     ```python
-    tds.gen({
+    tdg.gen({
         'model': School,
     })
     ```
@@ -180,8 +180,8 @@
 - 创建该学校内有一个年级
 
   ```python
-  from tds import p
-  tds.gen({
+  from tdg import p
+  tdg.gen({
       'model': School,
       'items':[{
           'model': Grade,
@@ -193,13 +193,13 @@
 ### 直接获取object数据
 
 ```python
-tds.gen({
+tdg.gen({
     'model': School,
     'alias': 's1',
     'name': 'Aengine学校'
 })
 
-school_obj = tds['s1']
+school_obj = tdg['s1']
 assert school_obj.name == 'Aengine学校' # True
 ```
 

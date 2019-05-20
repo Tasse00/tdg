@@ -6,12 +6,12 @@ from typing import Dict, Any, List
 
 import flask_sqlalchemy
 
-from tds.rules import GeneralRule as GR, StringWithIncrSuffix, ConstGenerator, RandomChoice, Rule, \
+from tdg.rules import GeneralRule as GR, StringWithIncrSuffix, ConstGenerator, RandomChoice, Rule, \
     Generator
-from tds.statement import Statement, AliasStatementOperation, AliasStatement
-from tds.utils import parent_alias
+from tdg.statement import Statement, AliasStatementOperation, AliasStatement
+from tdg.utils import parent_alias
 
-logger = logging.getLogger('test.tds')
+logger = logging.getLogger('test.tdg')
 
 
 class AliasNotExisted(Exception):
@@ -19,7 +19,7 @@ class AliasNotExisted(Exception):
         self.alias = alias
 
 
-class TDS:
+class TDG:
 
     def __init__(self, db: flask_sqlalchemy.SQLAlchemy, models_modules: List[str],
                  field_generator_config: Dict[Any, Dict[str, Rule]]):
@@ -91,7 +91,7 @@ class TDS:
 
     def _setup(self):
         """建立数据库"""
-        self._db.session().expire_on_commit = False  # 为了TDS['XX']始终可用
+        self._db.session().expire_on_commit = False  # 为了TDG['XX']始终可用
         self._clean_data()
 
     def _teardown(self):
@@ -99,33 +99,33 @@ class TDS:
         self._db.session().expire_on_commit = True
         self._clean_data()
 
-    def _new_obj(self, _tds_Model, _tds_alias=None, _tds_commit=False, **kwargs):
+    def _new_obj(self, _tdg_Model, _tdg_alias=None, _tdg_commit=False, **kwargs):
         """
         新建某一Model的记录. alias作为该条记录别名.
         kw中的字段会自动映射到Model表的初始化. 若kw中存在_default值的字段,则会调用规则器生成新的一个值
         :raise InsufficientRule:
         """
 
-        logger.debug("new '%s'<%s> with %s", _tds_alias, _tds_Model.__name__, kwargs)
+        logger.debug("new '%s'<%s> with %s", _tdg_alias, _tdg_Model.__name__, kwargs)
 
         data = kwargs.copy()
 
-        for field, gen in self._gens.get(_tds_Model, {}).items():
+        for field, gen in self._gens.get(_tdg_Model, {}).items():
             if field not in kwargs:
                 data[field] = gen.next()
 
         for k, v in kwargs.items():
             data[k] = v
 
-        obj = _tds_Model(**data)
+        obj = _tdg_Model(**data)
         self._db.session.add(obj)
         self._db.session.flush()
-        if _tds_commit:
+        if _tdg_commit:
             self._db.session.commit()
 
         self._objs.append(obj)
-        if _tds_alias:
-            self._alias[_tds_alias] = obj
+        if _tdg_alias:
+            self._alias[_tdg_alias] = obj
 
         return obj
 

@@ -1,6 +1,6 @@
 import uuid
 
-from tds import AliasStatement
+from tdg import AliasStatement
 
 parent_alias = 'parent_' + uuid.uuid4().__str__().replace('-', '')
 
