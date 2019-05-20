@@ -1,3 +1,7 @@
 **/__pycache__
 .venv
 .idea
+
+TDG.egg-info
+build
+dist
