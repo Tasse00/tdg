@@ -7,9 +7,34 @@
 
 ## 设计理念
 
-- 直观的数据关系
+- 数据关系直观
 - 无用数据零输入
 - 配置优于命令
+
+## 概念
+
+1. 加载模型定义
+  
+    - BaseFiller 填充器
+    - BaseFillerTypeRepo 填充器类型仓库
+    - ModelConfig 模型定义对象
+    - BaseModelConfigParser 模型定义解析器->ModelConfig[]
+
+2. 解析对象树
+
+    - ObjNode 对象节点
+    - BaseObjTreeParser 对象树解析器->ObjNode[]
+    
+3. 组装对象
+
+    - BaseExplainer 使用者设置值的解释器
+    - BaseExplainerRepo 解释器实例仓库
+    - BaseObjBuilder 对象生成器, nodes, exp_repo, filler_repo -> 
+    - 
+
+1. 解析Config
+2. 解析Tree -> nodes
+3. 创建objs
 
 ## 对比实例
 
