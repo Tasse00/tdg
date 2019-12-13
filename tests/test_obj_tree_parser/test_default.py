@@ -1,6 +1,6 @@
 import yaml
 
-from tdg.v1.tree.defautl import DefaultObjTreeParser
+from tdg.v1.tree.default import DefaultObjTreeParser
 
 
 def test_obj_tree_parser():

@@ -5,7 +5,7 @@ from tdg.v1.config.default import DefaultModelConfigParser, DefaultModelConfigRe
 from tdg.v1.explainer.default import DefaultExplainerRepo
 from tdg.v1.filler.default import DefaultFillerTypeRepo
 from tdg.v1.tdg import BaseTdg
-from tdg.v1.tree.defautl import DefaultObjTreeParser
+from tdg.v1.tree.default import DefaultObjTreeParser
 
 
 def test_base_tdg_with_default_coms(db):
