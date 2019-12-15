@@ -15,30 +15,25 @@
 
 1. 加载模型定义
   
-    - BaseFiller 填充器
-    - BaseFillerTypeRepo 填充器类型仓库
-    - ModelConfig 模型定义对象
-    - BaseModelConfigParser 模型定义解析器->ModelConfig[]
+    - `BaseFiller` Model的字段填充器
+    - `BaseFillerTypeRepo` 管理Model字段填充器类型仓库
+    - `ModelConfig` Model定义对象，其内部包含字段配置的自动填充器
+    - `BaseModelConfigParser` ModelConfig的解析器，将Json或其他格式存储的配置解析为ModelConfig实例列表。
 
 2. 解析对象树
 
-    - ObjNode 对象节点
-    - BaseObjTreeParser 对象树解析器->ObjNode[]
+    - `ObjNode` 每个待生成的Obj在Tree中都有一个对应的ObjNode对象.
+    - `BaseObjTreeParser` 对象树解析器。从Json或其他格式存储的配置中解析需要生成的对象，产出ObjNode列表.
     
 3. 组装对象
 
-    - BaseExplainer 使用者设置值的解释器
-    - BaseExplainerRepo 解释器实例仓库
-    - BaseObjBuilder 对象生成器, nodes, exp_repo, filler_repo -> 
-    - 
-
-1. 解析Config
-2. 解析Tree -> nodes
-3. 创建objs
+    - `BaseExplainer` 字段值解释器，以特定的规则去处理字段值。
+    - `BaseExplainerRepo` 解释器实例仓库，按照支持的协议管理解释器。
+    - `BaseObjBuilder` 对象生成器,配合解释器仓库及填充器仓库将ObjNode创建为实际的数据对象。 
 
 ## 对比实例
 
-- 基础写法
+- 在用例中生成数据的写法
 
   ```python
   @pytest.fixture(scope="function")
@@ -113,51 +108,51 @@
 - TDG 语法
 
   ```python
-  TDG
   tdg.gen({
-      'model': School,
+      'model': 'School',
+      'alias': 'sch',
       'items': [{
-          'model': Grade,
-          'school': p,
+          'model': 'Grade',
+          '$school': 'parent>',
           'items': [{
-              'model': Clas,
+              'model': 'Clas',
               'alias': 'c1',
-              'grade': p,
-              'respkg': lambda rp1: str(rp1.id),
+              '$grade': 'parent>',
+              '$respkg': 'calc> lambda rp1: str(rp1.id)',
           }]
       }, {
-          'model': Student,
-          'school': p,
+          'model': 'Student',
+          '$school': 'parent>',
+          'alias': 's1',
           'items':[{
-              'model': StudentClas,
-              'stu_id': p.id,
-              'cls_id': ref('c1').id
+              'model': 'StudentClas',
+              '$student': 'parent>',
+              '$cls_id': 'ref> c1.id'
           }, {
-              'model': ReadingStau,
-              'student_id': p.id,
-              'insts':[{
-                  'article_id': ref('r1').id,
-                  'finished': 1,
-                  'read_finished': 1,
-                  'pron_finished': 1,
-                  'answer_finished': 1,
-                  'pron_stars': 3,
-                  'read_stars': 3,
-                  'answer_stars': 3
-  
+              'model': 'ReadingStau',
+              '$student': 'parent>',
+              'duplicate':[{
+                  '$article_id': 'ref>r1.id',
+                  '$finished': 1,
+                  '$read_finished': 1,
+                  '$pron_finished': 1,
+                  '$answer_finished': 1,
+                  '$pron_stars': 3,
+                  '$read_stars': 3,
+                  '$answer_stars': 3
               }, {
-                  'article_id': ref('r2').id,
-                  'finished': 0,
+                  '$article_id': 'ref> r2.id',
+                  '$finished': 0,
               }]
           }]
       }, {
-          'model': Respkg,
+          'model': 'Respkg',
           'alias': 'rp1',
-          'schools': [p],
+          '$schools': 'calc> lambda sch: [sch]',
           'items': [{
-              'model': Article,
-              'respkgs': lambda p: [p],
-              'insts':[{
+              'model': 'Article',
+              '$respkgs': 'calc> lambda rp1: [rp1]' ,
+              'duplicate':[{
                   'alias': 'r1',
               },{
                   'alias': 'r2',
@@ -167,7 +162,6 @@
           }]
       }]
   })
-  
   ```
 
 ## 语法说明
@@ -179,16 +173,20 @@
 | model    | √    | 声明该条记录的类型．                                         |
 | alias    | ×    | 指定该条记录的访问别名．                                     |
 | items    | ×    | 该条记录在逻辑上的子项．                                     |
-| insts    | ×    | 用于批量制定字项，存在该字段时会将当前其他字段作为inst中各记录实例的默认值. |
-| 任意字段 | ×    | 传递给Model实例化方法                                        |
+| duplicate    | ×    | 用于批量制定字项，存在该字段时会将当前其他字段作为inst中各记录实例的默认值. |
+| $**** | ×    | 传递给Model实例化方法                                        |
 
-### 特殊值及特殊方法
+### 字段值生成协议
 
-| 字段值     | 描述                                                     |
+> 针对 DefaultTreeParser
+
+`>` 区分协议与协议值
+
+| 协议     | 协议内容                                             |
 | ---------- | -------------------------------------------------------- |
-| 可调用方法 | 会将与方法的参数名相同alias的obj传入. 返回值作为该字段值 |
-| p          | 代表父级object对象                                       |
-| ref()      | 相当于　lambda v: v, 操作方式与p相同                     |
+| parent | 父级对象 |
+| ref          | 已创建对象的值表达式，如`stu.name`                                       |
+| calc      | lambda表达式，参数为tdg中已存在对象的alias                     |
 
 ## API说明
 
@@ -198,33 +196,34 @@
 
     ```python
     tdg.gen({
-        'model': School,
+        'model': 'School',
     })
     ```
 
 - 创建该学校内有一个年级
 
   ```python
-  from tdg import p
   tdg.gen({
-      'model': School,
+      'model': 'School',
       'items':[{
-          'model': Grade,
-          'school': p
+          'model': 'Grade',
+          '$school': 'parent>'
       }]
   })
   ```
 
 ### 直接获取object数据
 
-```python
-tdg.gen({
-    'model': School,
-    'alias': 's1',
-    'name': 'Aengine学校'
-})
-
-school_obj = tdg['s1']
-assert school_obj.name == 'Aengine学校' # True
-```
+- 依据别名获取obj对象
+    
+    ```python
+    tdg.gen({
+        'model': 'School',
+        'alias': 's1',
+        '$name': 'Aengine学校'
+    })
+    
+    school_obj = tdg['s1']
+    assert school_obj.name == 'Aengine学校' # True
+    ```
 

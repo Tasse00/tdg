@@ -16,18 +16,22 @@ class Tdg(BaseTdg):
     default_obj_tree_parser = DefaultObjTreeParser()
     default_obj_builder = DefaultObjBuilder()
 
-    def __init__(self, db: SQLAlchemy, models: List[Type[Model]], models_config: dict):
+    def __init__(self, db: SQLAlchemy, models: List[Type[Model]], models_config: dict,
+                 auto_clean_when_teardown: bool = True):
         """
         :param db: flask-sqlalchemy 实例
         :param models: Model对象列表，用于自动清理
         :param models_config_desc: 字段填充规则的配置
+        :param auto_clean_in_ctx: 上下文使用时，自动清空数据库（不重建）
         """
         model_config_repo = DefaultModelConfigRepo()
         model_config_parser = DefaultModelConfigParser(model_config_repo, self.default_filler_type_repo)
         model_config_parser.parse_and_store(models, models_config)
 
         super(Tdg, self).__init__(db,
+                                  models,
                                   model_config_repo,
                                   self.default_explainer_repo,
                                   self.default_obj_tree_parser,
-                                  self.default_obj_builder)
+                                  self.default_obj_builder,
+                                  auto_clean_when_teardown)

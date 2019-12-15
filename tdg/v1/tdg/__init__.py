@@ -1,7 +1,8 @@
 import random
-from typing import Union, List
+from typing import Union, List, Type
 
 import flask_sqlalchemy
+from flask_sqlalchemy import Model
 
 from tdg.v1.builder import BaseObjBuilder
 from tdg.v1.config import BaseModelConfigRepo
@@ -12,15 +13,22 @@ from tdg.v1.tree import BaseObjTreeParser
 class BaseTdg:
 
     def __init__(self, db: flask_sqlalchemy.SQLAlchemy,
+                 models: List[Type[Model]],
                  model_conf_repo: BaseModelConfigRepo,
                  explainer_repo: BaseExplainerRepo,
                  obj_tree_parser: BaseObjTreeParser,
-                 obj_builder: BaseObjBuilder):
+                 obj_builder: BaseObjBuilder,
+                 auto_clean_when_teardown: bool):
+        """
+        :param auto_clean_when_teardown: 上下文使用时，自动清空数据库（不重建）
+        """
         self.db = db
+        self.total_models = models
         self.model_conf_repo = model_conf_repo
         self.explainer_repo = explainer_repo
         self.obj_tree_parser = obj_tree_parser
         self.obj_builder = obj_builder
+        self.auto_clean_when_teardown = auto_clean_when_teardown
 
         self.alias_objs = {}
         self.objs = []
@@ -39,32 +47,30 @@ class BaseTdg:
         self.objs.extend(objs)
         return self
 
-    def _clean_objs(self):
-        """清除当前tdg实例生成的数据"""
-        max_retries = 400  # 放置依赖项无法删除
+    def clean_db(self):
+        """清除数据库全部数据"""
+        max_retries = 400  # 放置依赖项无法删除陷入死循环
         retries = 0
-        objs = self.objs
-        while objs:
-            obj = random.choice(objs)
-            objs.remove(obj)
-            # TODO 是否可以全部remove后再commit?
+        rest_models = self.total_models.copy()
+        while rest_models:
+            model = random.choice(rest_models)
+
             try:
-                self.db.session.delete(obj)
+                model.query.delete()
                 self.db.session.commit()
+                rest_models.remove(model)
+                retries = 0
             except Exception as e:
                 retries += 1
-                self.db.session.rollback()
-                objs.append(obj)
-            else:
-                retries = 0
-            if retries >= max_retries:
-                raise RuntimeError("clean obj reached max retries limit! " + str(self.alias_objs))
+                if retries >= max_retries:
+                    raise RuntimeError("clean obj reached max retries limit! " + str(e))
 
     def setup(self):
         self.db.session().expire_on_commit = False
 
     def teardown(self):
-        self._clean_objs()
+        if self.auto_clean_when_teardown:
+            self.clean_db()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.teardown()

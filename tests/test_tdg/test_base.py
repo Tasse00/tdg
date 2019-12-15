@@ -65,12 +65,13 @@ def test_error_data(db):
 
     model_config_store = DefaultModelConfigRepo()
     filler_type_repo = DefaultFillerTypeRepo()
+    models = [School, Grade, Class, Student]
 
     DefaultModelConfigParser(
         model_config_store,
         filler_type_repo
     ).parse_and_store(
-        [School, Grade, Class, Student],
+        models,
         yaml.load(model_config_desc, yaml.BaseLoader)
     )
     explainer_repo = DefaultExplainerRepo()
@@ -78,13 +79,10 @@ def test_error_data(db):
     obj_tree_parser = DefaultObjTreeParser()
     obj_builder = DefaultObjBuilder()
 
-    with BaseTdg(db, model_config_store, explainer_repo, obj_tree_parser, obj_builder) as tdg:
-
+    with BaseTdg(db, models, model_config_store, explainer_repo, obj_tree_parser, obj_builder, True) as tdg:
         with pytest.raises(TypeError):
             obj_tree_desc = yaml.load(obj_tree_desc, yaml.BaseLoader)
             tdg.gen(obj_tree_desc)
-
-
 
 
 def test_base_tdg_with_default_coms(db):
@@ -143,12 +141,13 @@ def test_base_tdg_with_default_coms(db):
 
     model_config_store = DefaultModelConfigRepo()
     filler_type_repo = DefaultFillerTypeRepo()
+    models = [School, Grade, Class, Student]
 
     DefaultModelConfigParser(
         model_config_store,
         filler_type_repo
     ).parse_and_store(
-        [School, Grade, Class, Student],
+        models,
         yaml.load(model_config_desc, yaml.BaseLoader)
     )
     explainer_repo = DefaultExplainerRepo()
@@ -156,7 +155,7 @@ def test_base_tdg_with_default_coms(db):
     obj_tree_parser = DefaultObjTreeParser()
     obj_builder = DefaultObjBuilder()
 
-    with BaseTdg(db, model_config_store, explainer_repo, obj_tree_parser, obj_builder) as tdg:
+    with BaseTdg(db, models, model_config_store, explainer_repo, obj_tree_parser, obj_builder, True) as tdg:
         obj_tree_desc = yaml.load(obj_tree_desc, yaml.BaseLoader)
         tdg.gen(obj_tree_desc)
 
