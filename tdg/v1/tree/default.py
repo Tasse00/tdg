@@ -59,7 +59,8 @@ class DefaultObjTreeParser(BaseObjTreeParser):
                 if not k.startswith('$'):
                     raise RuntimeError("obj tree desc error, value data not start with $, " + k)
                 field_name = k[1:]
-                coms = v.split(self.proto_symbol, 1)
+                coms = [com.strip() for com in v.split(self.proto_symbol, 1)]
+
                 if len(coms) == 1:
                     values[field_name] = ValueDesc(field_name, v, None, coms[0])
                 else:

@@ -24,7 +24,7 @@ class Class(db.Model):
 
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.Integer, nullable=False)
+    name = db.Column(db.String, nullable=False)
 
     class_id = db.Column(db.Integer, nullable=False)
     grade_id = db.Column(db.Integer, nullable=False)

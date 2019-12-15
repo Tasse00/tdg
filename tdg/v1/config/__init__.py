@@ -53,5 +53,5 @@ class BaseModelConfigParser(abc.ABC):
     def parse(self, models: List[Type[Model]], model_conf_desc: Union[dict, List[dict]]) -> List[ModelConfig]:
         pass
 
-    def parse_and_store(self, models: List[Type[Model]], model_conf_desc: Union[dict, List[dict]]):
-        self.store.store(self.parse(models, model_conf_desc))
+    def parse_and_store(self, models: List[Type[Model]], models_config: dict):
+        self.store.store(self.parse(models, models_config))
