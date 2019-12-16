@@ -18,6 +18,7 @@ build:
   stage: build
 
   script:
+    - pip install pytest -i https://pypi.douban.com/simple
     - pytest -s -q
     - python setup.py sdist
     - pip install twine -i https://pypi.douban.com/simple
