@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='TDG',
@@ -11,13 +11,13 @@ setup(
     maintainer='Carl.Zhang',
     maintainer_email='zhangzheng@aengine.com.cn',
     license='BSD License',
-    packages=['tdg'],
+    packages=find_packages(include=("tdg*",)),
     install_requires=[
         'Flask_SQLAlchemy>=2.4,<=3.0',
         'marshmallow',
     ],
     platforms=["all"],
-    url='https://gitee.com/zhangbingxue/TDS',
+    url='https://gitlab.aengine.com.cn:aengine/tdg',
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: BSD License",
