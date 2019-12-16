@@ -13,13 +13,12 @@ before_script:
   - pip install virtualenv
   - virtualenv venv
   - source venv/bin/activate
-  - pip install -r fass/requirements.txt -i https://pypi.douban.com/simple
 
 build:
   stage: build
 
   script:
-    - ./run_test.sh
+    - pytest -s -q
     - python setup.py sdist
     - pip install twine -i https://pypi.douban.com/simple
     - twine upload --repository-url http://pypi.aengine.com.cn/ -u $AENGINE_PYPI_ACCOUNT -p $AENGINE_PYPI_PASSWORD dist/*
