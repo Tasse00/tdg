@@ -6,3 +6,4 @@ TDG.egg-info
 build
 dist
 test.db
+.coverage

@@ -229,6 +229,10 @@
 
 ## ChangeLog
 
+- 1.1.0
+    
+    - `feat` 为字段自动设置默认的填充器。
+
 - 1.0.2
     
     - `fix` gen() can not pass not str values!

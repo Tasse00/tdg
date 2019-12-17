@@ -1,6 +1,9 @@
 from typing import List, Dict, Type
 
 from flask_sqlalchemy import Model
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import RelationshipProperty
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from tdg.v1.config import BaseModelConfigRepo, ModelConfig, BaseModelConfigParser, ModelConfigError, ModelFieldConfig
 
@@ -21,6 +24,13 @@ class DefaultModelConfigRepo(BaseModelConfigRepo):
 
 
 class DefaultModelConfigParser(BaseModelConfigParser):
+
+    def _is_column_need_filler(self, col: Column):
+        return not (col.autoincrement == True or col.default or col.nullable)
+
+    def _get_column_default_filler(self, col: Column):
+        return self.filler_type_repo.create_filler(
+            {Integer: "IncrNumber", String: "RandomString", }[col.type.__class__], [], {})
 
     def parse(self, models: List[Type[Model]], models_conf: dict) -> List[ModelConfig]:
         """
@@ -53,7 +63,7 @@ class DefaultModelConfigParser(BaseModelConfigParser):
             mdl_idx = [mdl.__name__ for mdl in models].index(model_name)
 
             if mdl_idx < 0:
-                raise ModelConfigError(f"model_conf['{raw_mdl_cnf['name']}'] not exist in models.")
+                raise ModelConfigError(f"model_conf['{model_name}'] not exist in models.")
 
             mdl = models.pop(mdl_idx)
             fillers_cnf = []
@@ -74,7 +84,40 @@ class DefaultModelConfigParser(BaseModelConfigParser):
                     filler=filler
                 ))
 
+            for attr in dir(mdl):
+                if attr.startswith("_") or attr in ['query']:
+                    continue
+                model_col = getattr(mdl, attr)
+                if not isinstance(model_col, InstrumentedAttribute) or isinstance(model_col.comparator,
+                                                                                  RelationshipProperty.Comparator):
+                    continue
+                col = next(iter(model_col.proxy_set))
+
+                if self._is_column_need_filler(col):
+                    filler = self._get_column_default_filler(col)
+                    fillers_cnf.append(ModelFieldConfig(
+                        attr,
+                        filler
+                    ))
             mdl_cnf = ModelConfig(name=model_name, model=mdl, fields_=fillers_cnf)
             model_config_list.append(mdl_cnf)
 
+        for rest_model in models:
+            fillers_cnf = []
+            for attr in dir(rest_model):
+                if attr.startswith("_") or attr in ['query']:
+                    continue
+                model_col = getattr(rest_model, attr)
+                if not isinstance(model_col, InstrumentedAttribute) or isinstance(model_col.comparator,
+                                                                                  RelationshipProperty.Comparator):
+                    continue
+                col = next(iter(model_col.proxy_set))
+                if self._is_column_need_filler(col):
+                    filler = self._get_column_default_filler(col)
+                    fillers_cnf.append(ModelFieldConfig(
+                        attr,
+                        filler
+                    ))
+            mdl_cnf = ModelConfig(name=rest_model.__name__, model=rest_model, fields_=fillers_cnf)
+            model_config_list.append(mdl_cnf)
         return model_config_list
