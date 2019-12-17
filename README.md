@@ -1,4 +1,6 @@
 # TDG
+[![coverage report](http://gitlab.aengine.com.cn/aengine/tdg/badges/master/coverage.svg)](http://gitlab.aengine.com.cn/aengine/tdg/commits/master)
+[![pipeline status](http://gitlab.aengine.com.cn/aengine/tdg/badges/master/pipeline.svg)](http://gitlab.aengine.com.cn/aengine/tdg/commits/master)
 
 ## 设计目标
 
