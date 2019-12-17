@@ -50,6 +50,7 @@ def test_normal_usage(db):
     }, {
         "model": "Student",
         "alias": "stu1",
+        "$id": 1000,
         "$school_id": "ref > sch1.id",
         "$grade_id": "ref > grd1.id",
         "$class_id": "ref > cls1.id",

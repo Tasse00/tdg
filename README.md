@@ -227,3 +227,8 @@
     assert school_obj.name == 'Aengine学校' # True
     ```
 
+## ChangeLog
+
+- 1.0.2
+    
+    - `fix` gen() can not pass not str values!
