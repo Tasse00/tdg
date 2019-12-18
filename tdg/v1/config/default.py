@@ -1,7 +1,7 @@
 from typing import List, Dict, Type
 
 from flask_sqlalchemy import Model
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, BigInteger, Text, DateTime
 from sqlalchemy.orm import RelationshipProperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -26,11 +26,17 @@ class DefaultModelConfigRepo(BaseModelConfigRepo):
 class DefaultModelConfigParser(BaseModelConfigParser):
 
     def _is_column_need_filler(self, col: Column):
-        return not (col.autoincrement == True or col.default or col.nullable)
+        return not (col.autoincrement == True or col.default or col.nullable or col.server_default)
 
     def _get_column_default_filler(self, col: Column):
         return self.filler_type_repo.create_filler(
-            {Integer: "IncrNumber", String: "RandomString", }[col.type.__class__], [], {})
+            {
+                Integer: "IncrNumber",
+                String: "RandomString",
+                BigInteger: "IncrNumber",
+                Text: "RandomString",
+                DateTime: "DateTime",
+            }[col.type.__class__], [], {})
 
     def parse(self, models: List[Type[Model]], models_conf: dict) -> List[ModelConfig]:
         """

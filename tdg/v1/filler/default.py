@@ -1,5 +1,6 @@
 import random
 import string
+from datetime import datetime
 from typing import Dict, Type
 
 from tdg.v1.filler import BaseFillerTypeRepo, BaseFiller
@@ -61,8 +62,25 @@ class IncrNumber(BaseFiller):
         return self.base + (self.index - 1) * self.step
 
 
+class DateTime(BaseFiller):
+
+    def __init__(self, fixed_date=None, fixed_format="YYYY-mm-dd HH:MM:SS"):
+        super(DateTime, self).__init__()
+        self.fixed_date = fixed_date
+        self.fixed_format = fixed_format
+        if self.fixed_date:
+            self.fixed_value = datetime.strptime(self.fixed_date, self.fixed_format)
+
+    def generate(self):
+        if self.fixed_date:
+            return self.fixed_value
+        else:
+            return datetime.now()
+
+
 default_filler_types = [
     RandomString,
     RandomString,
     IncrNumber,
+    DateTime,
 ]

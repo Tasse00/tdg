@@ -231,6 +231,11 @@
 
 ## ChangeLog
 
+- 1.1.1
+    
+    - `fix` 对 BigInteger, Text, Datetime 类型字段对自动填充支持
+    - `fix` 未考虑server_default情况 
+
 - 1.1.0
     
     - `feat` 为字段自动设置默认的填充器。
