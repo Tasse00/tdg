@@ -22,12 +22,13 @@ build:
     - pip install pytest pyyaml coverage -i https://pypi.douban.com/simple
     - coverage run -m pytest
     - coverage report
-    - coverage html -d $HTML_OUTPUT
+    - coverage html -d coverage.report
     - python setup.py sdist
     - pip install twine -i https://pypi.douban.com/simple
     - twine upload --repository-url http://pypi.aengine.com.cn/ -u $AENGINE_PYPI_ACCOUNT -p $AENGINE_PYPI_PASSWORD dist/*
   artifacts:
     paths:
       - dist/*
+      - coverage.report/*
   only:
     - master
