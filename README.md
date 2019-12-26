@@ -231,6 +231,11 @@
 
 ## ChangeLog
 
+- 1.1.2
+  
+    - `fix` 默认filler重复注册RandomString
+    - `fix` 默认IncrNumber自增逻辑异常
+
 - 1.1.1
     
     - `fix` 对 BigInteger, Text, Datetime 类型字段对自动填充支持

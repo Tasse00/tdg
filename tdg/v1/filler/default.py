@@ -59,7 +59,7 @@ class IncrNumber(BaseFiller):
         self.step = step
 
     def generate(self):
-        return self.base + (self.index - 1) * self.step
+        return self.base + (self.index) * self.step
 
 
 class DateTime(BaseFiller):
@@ -80,7 +80,7 @@ class DateTime(BaseFiller):
 
 default_filler_types = [
     RandomString,
-    RandomString,
+    RandomNumber,
     IncrNumber,
     DateTime,
 ]
