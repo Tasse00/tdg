@@ -3,6 +3,8 @@ from typing import Union, List, Type
 
 import flask_sqlalchemy
 from flask_sqlalchemy import Model
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.sql.elements import BooleanClauseList
 
 from tdg.v1.builder import BaseObjBuilder
 from tdg.v1.config import BaseModelConfigRepo
@@ -54,6 +56,21 @@ class BaseTdg:
         rest_models = self.total_models.copy()
         while rest_models:
             model = random.choice(rest_models)
+
+            ## 删除多对多的Table
+            # 获取多对多的字段
+            fields = []
+            for attr in dir(model):
+                val = getattr(model, attr)
+                if isinstance(val, InstrumentedAttribute):
+                    if isinstance(val.expression, BooleanClauseList):
+                        fields.append(attr)  # 多对多字段
+            if fields:
+                for obj in model.query.all():
+                    for field in fields:
+                        setattr(obj, field, [])
+                    self.db.session.add(obj)
+                    self.db.session.flush()
 
             try:
                 model.query.delete()
