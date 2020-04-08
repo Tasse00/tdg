@@ -20,6 +20,12 @@ class ObjNode:
     def get_field_value_desc(self, field_name: str) -> ValueDesc:
         return self.values[field_name]
 
+    def __repr__(self):
+        return '<{}[{}:{}:{}:{}]>'.format(
+            self.__class__.__name__,
+            self.model, self.alias, self.parent.alias if self.parent else 'None',
+            ",".join(self.values.keys())
+        )
 
 class BaseObjTreeParser(ABC):
 
