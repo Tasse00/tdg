@@ -102,7 +102,7 @@ class DefaultObjTreeParser(BaseObjTreeParser):
                 elif isinstance(v, Statement):
                     # Statement表达式
                     if v._base == parent_alias:
-                        expr = 'lambda {}: {}'.format(parent.alias, v._base.replace(parent_alias, parent.alias))
+                        expr = 'lambda {}: {}'.format(parent.alias, v._expr.replace(parent_alias, parent.alias))
                         complete = 'calc>' + expr
                         values[field_name] = ValueDesc(field_name, complete, 'calc', expr)
                     else:

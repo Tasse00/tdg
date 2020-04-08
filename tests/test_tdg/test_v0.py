@@ -69,7 +69,7 @@ def test_v0_usage(db):
             "items": [{
                 "alias": "grd1",
                 "model": Grade,
-                "school": p,
+                "school_id": p.id,
                 "items": [{
                     "model": Class,
                     "alias": "cls1",
