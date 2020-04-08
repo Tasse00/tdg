@@ -6,7 +6,7 @@ from tdg import BaseTdg, DefaultFillerTypeRepo, DefaultExplainerRepo, DefaultObj
     DefaultModelConfigParser
 from tdg.v0.tree.default import DefaultObjTreeParser
 from tdg.v0.utils import p, ref
-from tests.example_app.models import School, Grade, Class, Student
+from tests.example_app.models import School, Grade, Class, Student, Hobby
 
 
 class Tdg(BaseTdg):
@@ -59,7 +59,7 @@ def test_v0_usage(db):
         },
     }
 
-    tdg = Tdg(db, [School, Grade, Class, Student], model_config)
+    tdg = Tdg(db, [School, Grade, Class, Student, Hobby], model_config)
 
     data_to_gen = [{
         "model": School,
@@ -83,6 +83,9 @@ def test_v0_usage(db):
             "alias": "sch2",
         }]
     }, {
+        "model": Hobby,
+        "insts": [{'alias': 'h1'}, {"alias": "h2"}],
+    }, {
         "model": Student,
         "alias": "stu1",
         "school_id": ref('sch1').id,
@@ -95,6 +98,7 @@ def test_v0_usage(db):
         "school_id": ref('sch1').id,
         "grade_id": ref("grd1").id,
         "class_id": ref("cls1").id,
+        "hobbies": [ref('h1'), ref('h2')]
     }]
     tdg.gen(data_to_gen)
 
@@ -109,6 +113,7 @@ def test_v0_usage(db):
     assert tdg['stu1'].class_id == tdg['cls1'].id
     assert tdg['stu1'].name == str(1000 * tdg['sch1'].id + 100 * tdg['grd1'].id)
     assert tdg['stu2'].name.startswith('student-')
+    assert len(tdg['stu2'].hobbies) == 2
     assert School.query.count() == 2
     assert Grade.query.count() == 2
     assert Class.query.count() == 1

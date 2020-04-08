@@ -109,6 +109,28 @@ class DefaultObjTreeParser(BaseObjTreeParser):
                         expr = 'lambda {}: {}'.format(v._base, v._expr)
                         complete = 'calc>' + expr
                         values[field_name] = ValueDesc(field_name, complete, 'calc', expr)
+                elif isinstance(v, (list, tuple)):
+
+                    # 兼容 [ref('a'), p.id] 此类情景
+                    if all([isinstance(item, Statement) for item in v]):
+
+                        alias_list = []
+                        value_list = []
+                        for sm in v:
+                            if sm._base == parent_alias:
+                                alias_list.append(parent.alias)
+                                value_list.append(sm._expr.replace(parent_alias, parent.alias))
+                            else:
+                                alias_list.append(sm._base)
+                                value_list.append(sm._expr)
+
+                        expr = 'lambda {}: [{}]'.format(", ".join(alias_list), ", ".join(value_list))
+                        complete = 'calc>' + expr
+                        values[field_name] = ValueDesc(field_name, complete, 'calc', expr)
+
+                    else:
+                        values[field_name] = ValueDesc(field_name, v, None, v)
+
                 else:
                     values[field_name] = ValueDesc(field_name, v, None, v)
 
