@@ -40,40 +40,60 @@ class DefaultObjBuilder(BaseObjBuilder):
         """flush至db"""
         new_alias_models: Dict[str, Model] = {}
         total_objs = []  # 考虑到重alias obj
-        for node in nodes:
-            # 可能会获取出错,需要反馈给使用者: Model配置不对
-            model_cnf = model_conf_repo.get_model_conf(node.model)
-            alias = node.alias
-            values = node.values
 
-            auto_filled_fields = {field.name: field.filler.next() for field in model_cnf.fields}
+        rest_nodes = nodes.copy()
+        while rest_nodes:
+            failed_nodes = []
 
-            user_specified_fields = {}
-            for field_name, field_desc in values.items():
+            for node in rest_nodes:
+                # 可能会获取出错,需要反馈给使用者: Model配置不对
+                model_cnf = model_conf_repo.get_model_conf(node.model)
+                alias = node.alias
+                values = node.values
 
-                if field_desc.protocol:
-                    explainer = explainer_repo.get_explainer(field_desc.protocol)
+                auto_filled_fields = {field.name: field.filler.next() for field in model_cnf.fields}
 
-                    parents_path = self._get_node_parent_path(existed_objs,
-                                                              new_alias_models,
-                                                              node)
-                    field_value = explainer.get_value(parents_path,
-                                                      self._get_requested_objs(existed_objs,
-                                                                               new_alias_models,
-                                                                               explainer.need_objs(field_desc.expr)),
-                                                      field_desc.expr)
-                    user_specified_fields[field_name] = field_value
-                else:
-                    user_specified_fields[field_name] = field_desc.expr
+                user_specified_fields = {}
+                skip = False
+                for field_name, field_desc in values.items():
 
-            auto_filled_fields.update(user_specified_fields)
+                    if field_desc.protocol:
+                        explainer = explainer_repo.get_explainer(field_desc.protocol)
 
-            # 暂不处理异常
-            obj = model_cnf.model(**auto_filled_fields)
-            db.session.add(obj)
-            db.session.flush()
+                        parents_path = self._get_node_parent_path(existed_objs,
+                                                                  new_alias_models,
+                                                                  node)
 
-            new_alias_models[alias] = obj
-            total_objs.append(obj)
+                        requested_objs = self._get_requested_objs(existed_objs,
+                                                                  new_alias_models,
+                                                                  explainer.need_objs(field_desc.expr))
+                        if any([val is None for val in requested_objs.values()]):
+                            failed_nodes.append(node)  # 通过重试机制实现加载懒加载依赖尚未生成alias的node
+                            skip = True
+                        else:
+                            field_value = explainer.get_value(parents_path,
+                                                              requested_objs,
+                                                              field_desc.expr)
+                            user_specified_fields[field_name] = field_value
+                    else:
+                        user_specified_fields[field_name] = field_desc.expr
+                if skip:
+                    continue
+
+                auto_filled_fields.update(user_specified_fields)
+
+                # 暂不处理异常
+                obj = model_cnf.model(**auto_filled_fields)
+                db.session.add(obj)
+                db.session.flush()
+
+                new_alias_models[alias] = obj
+                total_objs.append(obj)
+
+            if len(rest_nodes) == len(failed_nodes):
+                raise ValueError("can not meet nodes required alias!")
+
+            rest_nodes = failed_nodes
+
         db.session.commit()
         return new_alias_models, total_objs
