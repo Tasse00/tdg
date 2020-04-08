@@ -89,6 +89,12 @@ def test_v0_usage(db):
         "grade_id": ref("grd1").id,
         "class_id": ref("cls1").id,
         "name": lambda sch1, grd1: 1000 * sch1.id + 100 * grd1.id,
+    }, {
+        "model": Student,
+        "alias": "stu2",
+        "school_id": ref('sch1').id,
+        "grade_id": ref("grd1").id,
+        "class_id": ref("cls1").id,
     }]
     tdg.gen(data_to_gen)
 
@@ -102,8 +108,8 @@ def test_v0_usage(db):
     assert tdg['stu1'].grade_id == tdg['grd1'].id
     assert tdg['stu1'].class_id == tdg['cls1'].id
     assert tdg['stu1'].name == str(1000 * tdg['sch1'].id + 100 * tdg['grd1'].id)
-
+    assert tdg['stu2'].name.startswith('student-')
     assert School.query.count() == 2
     assert Grade.query.count() == 2
     assert Class.query.count() == 1
-    assert Student.query.count() == 1
+    assert Student.query.count() == 2

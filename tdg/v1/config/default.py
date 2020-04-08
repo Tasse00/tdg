@@ -91,6 +91,8 @@ class DefaultModelConfigParser(BaseModelConfigParser):
                 ))
 
             for attr in dir(mdl):
+                if attr in model_conf.get('fillers', {}).keys():
+                    continue
                 if attr.startswith("_") or attr in ['query']:
                     continue
                 model_col = getattr(mdl, attr)
