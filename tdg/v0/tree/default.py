@@ -93,6 +93,9 @@ class DefaultObjTreeParser(BaseObjTreeParser):
                     line = inspect.getsource(v).strip()
                     startIdx = line.find('lambda')
                     val = line[startIdx:]
+                    # 源码中一行最后存在','导致加载出来后是个元组
+                    if val[-1] == ',':
+                        val = val[:-1]
                     complete = 'calc>' + val
                     values[field_name] = ValueDesc(field_name, complete, 'calc', val)
 

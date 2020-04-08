@@ -88,7 +88,7 @@ def test_v0_usage(db):
         "school_id": ref('sch1').id,
         "grade_id": ref("grd1").id,
         "class_id": ref("cls1").id,
-        "name": lambda sch1, grd1: 1000 * sch1.id + 100 * grd1.id
+        "name": lambda sch1, grd1: 1000 * sch1.id + 100 * grd1.id,
     }]
     tdg.gen(data_to_gen)
 
