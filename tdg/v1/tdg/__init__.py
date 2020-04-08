@@ -69,7 +69,8 @@ class BaseTdg:
                 for obj in model.query.all():
                     for field in fields:
                         setattr(obj, field, [])
-                    self.db.session.add(obj)
+                    # 导致异常，提示Instance已经被删除！
+                    # self.db.session.add(obj)
                     self.db.session.flush()
 
             try:
