@@ -52,7 +52,7 @@ class DefaultObjTreeParser(BaseObjTreeParser):
                 continue
 
             model = node_desc.pop('model', None)
-            alias = node_desc.pop('alias', None) or "auto_alias-" + uuid.uuid4().__str__().replace("-", "")
+            alias = node_desc.pop('alias', None) or "auto_alias_" + uuid.uuid4().__str__().replace("-", "")
             items = node_desc.pop('items', None)
             values = {}
             for k, v in node_desc.items():
