@@ -1,7 +1,7 @@
 import random
 import string
 from datetime import datetime
-from typing import Dict, Type
+from typing import Dict, Type, Any
 
 from tdg.v1.filler import BaseFillerTypeRepo, BaseFiller
 
@@ -78,9 +78,20 @@ class DateTime(BaseFiller):
             return datetime.now()
 
 
+class Constant(BaseFiller):
+
+    def __init__(self, const: Any):
+        super(Constant, self).__init__()
+        self.const = const
+
+    def generate(self):
+        return self.const
+
+
 default_filler_types = [
     RandomString,
     RandomNumber,
     IncrNumber,
     DateTime,
+    Constant,
 ]

@@ -1,5 +1,5 @@
 from tdg import Tdg
-from tests.example_app.models import School, Grade, Class, Student
+from tests.example_app.models import School, Grade, Class, Student, Hobby
 
 
 def test_normal_usage(db):
@@ -21,9 +21,17 @@ def test_normal_usage(db):
                 }
             }
         },
+        "Hobby": {
+            "fillers": {
+                "name": {
+                    "class": "Constant",
+                    "args": ["HOBBY"]
+                }
+            }
+        }
     }
 
-    tdg = Tdg(db, [School, Grade, Class, Student], model_config)
+    tdg = Tdg(db, [School, Grade, Class, Student, Hobby], model_config)
 
     data_to_gen = [{
         "model": "School",
@@ -55,6 +63,9 @@ def test_normal_usage(db):
         "$grade_id": "ref > grd1.id",
         "$class_id": "ref > cls1.id",
         "$name": 'calc>lambda sch1, grd1: 1000*sch1.id+100*grd1.id',
+    }, {
+        "model": "Hobby",
+        "duplicate": [{'alias': 'h1'}, {'alias': 'h2'}],
     }]
     tdg.gen(data_to_gen)
 
@@ -67,7 +78,10 @@ def test_normal_usage(db):
     assert tdg['stu1'].school_id == tdg['sch1'].id
     assert tdg['stu1'].grade_id == tdg['grd1'].id
     assert tdg['stu1'].class_id == tdg['cls1'].id
-    assert tdg['stu1'].name == str(1000*tdg['sch1'].id+100*tdg['grd1'].id)
+    assert tdg['stu1'].name == str(1000 * tdg['sch1'].id + 100 * tdg['grd1'].id)
+
+    assert tdg['h1'].name == 'HOBBY'
+    assert tdg['h2'].name == 'HOBBY'
 
     assert School.query.count() == 2
     assert Grade.query.count() == 2
