@@ -1,3 +1,4 @@
+from random import shuffle
 from typing import List, Dict, Tuple
 
 from flask_sqlalchemy import Model, SQLAlchemy
@@ -42,6 +43,7 @@ class DefaultObjBuilder(BaseObjBuilder):
         total_objs = []  # 考虑到重alias obj
 
         rest_nodes = nodes.copy()
+        retried = 0
         while rest_nodes:
             failed_nodes = []
 
@@ -90,10 +92,16 @@ class DefaultObjBuilder(BaseObjBuilder):
                 new_alias_models[alias] = obj
                 total_objs.append(obj)
 
+            # 复杂情况下的依赖问题
+            # TODO: 更好的解决依赖问题 > 提前给nodes排序
             if len(rest_nodes) == len(failed_nodes):
-                raise ValueError("can not meet nodes required alias!")
-
+                retried += 1
+                if retried > 100:
+                    raise ValueError("can not meet nodes required alias!")
+            else:
+                retried = 0
             rest_nodes = failed_nodes
+            shuffle(rest_nodes)
 
         db.session.commit()
         return new_alias_models, total_objs
