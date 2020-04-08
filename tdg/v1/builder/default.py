@@ -79,6 +79,10 @@ class DefaultObjBuilder(BaseObjBuilder):
                             user_specified_fields[field_name] = field_value
                     else:
                         user_specified_fields[field_name] = field_desc.expr
+
+                    if skip:
+                        break
+
                 if skip:
                     continue
 
