@@ -49,6 +49,35 @@ class BaseTdg:
         self.objs.extend(objs)
         return self
 
+    def _clean_many_to_many_records(self, model):
+        """删除多对多字段所使用的关系表记录"""
+
+        m2m_fields = []  # many to many fields
+        for attr in dir(model):
+            val = getattr(model, attr)
+            if isinstance(val, InstrumentedAttribute):
+                if isinstance(val.expression, BooleanClauseList):
+                    m2m_fields.append(attr)  # 多对多字段
+
+        if m2m_fields:
+
+            for obj in model.query.all():
+                # 健壮性处理:
+                # 假如存在两个多对多的Model: Blog, Tag
+                # 在业务代码中，如果出现　blog_obj.tags += [tag_obj] 形式代码，就有可能造成 blog_obj.tags 中存在重复tag对象的问题
+                # 但是数据库中的中间表并不会插入多条关联记录 (sqlalchemy保证)，即sqlalchemy model的缓存并未同步数据库
+                # 处理方式：若set后长度不同，则刷新该对象
+                for field in m2m_fields:
+                    rel_values = getattr(obj, field, [])
+                    if len(set(rel_values)) != len(rel_values):
+                        self.db.session.refresh(obj)
+                        break
+
+                for field in m2m_fields:
+                    setattr(obj, field, [])
+
+            self.db.session.flush()
+
     def clean_db(self):
         """清除数据库全部数据"""
         max_retries = 400  # 放置依赖项无法删除陷入死循环
@@ -57,31 +86,19 @@ class BaseTdg:
         while rest_models:
             model = random.choice(rest_models)
 
-            ## 删除多对多的Table
-            # 获取多对多的字段
-            fields = []
-            for attr in dir(model):
-                val = getattr(model, attr)
-                if isinstance(val, InstrumentedAttribute):
-                    if isinstance(val.expression, BooleanClauseList):
-                        fields.append(attr)  # 多对多字段
-            if fields:
-                for obj in model.query.all():
-                    for field in fields:
-                        setattr(obj, field, [])
-                    # 导致异常，提示Instance已经被删除！
-                    # self.db.session.add(obj)
-                    self.db.session.flush()
+            self._clean_many_to_many_records(model)
 
             try:
                 model.query.delete()
-                self.db.session.commit()
+                self.db.session.flush()
                 rest_models.remove(model)
                 retries = 0
             except Exception as e:
                 retries += 1
                 if retries >= max_retries:
                     raise RuntimeError("clean obj reached max retries limit! " + str(e))
+
+        self.db.session.commit()
 
     def setup(self):
         self.db.session().expire_on_commit = False
