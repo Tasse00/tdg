@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='TDG',
-    version="1.2.11",
+    version="1.2.12",
     description=('基于flask-sqlalchemy的配置化测试数据生产工具'),
     long_description=open('README.md', encoding="utf8").read(),
     long_description_content_type='text/markdown',
