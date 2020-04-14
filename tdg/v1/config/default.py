@@ -25,10 +25,10 @@ class DefaultModelConfigRepo(BaseModelConfigRepo):
 
 class DefaultModelConfigParser(BaseModelConfigParser):
 
-    def _is_column_need_filler(self, col: Column):
+    def is_column_need_filler(self, col: Column):
         return not (col.autoincrement == True or col.default or col.nullable or col.server_default)
 
-    def _get_column_default_filler(self, col: Column):
+    def get_column_default_filler(self, col: Column):
         return self.filler_type_repo.create_filler(
             {
                 Integer: "IncrNumber",
@@ -101,8 +101,8 @@ class DefaultModelConfigParser(BaseModelConfigParser):
                     continue
                 col = next(iter(model_col.proxy_set))
 
-                if self._is_column_need_filler(col):
-                    filler = self._get_column_default_filler(col)
+                if self.is_column_need_filler(col):
+                    filler = self.get_column_default_filler(col)
                     fillers_cnf.append(ModelFieldConfig(
                         attr,
                         filler
@@ -120,8 +120,8 @@ class DefaultModelConfigParser(BaseModelConfigParser):
                                                                                   RelationshipProperty.Comparator):
                     continue
                 col = next(iter(model_col.proxy_set))
-                if self._is_column_need_filler(col):
-                    filler = self._get_column_default_filler(col)
+                if self.is_column_need_filler(col):
+                    filler = self.get_column_default_filler(col)
                     fillers_cnf.append(ModelFieldConfig(
                         attr,
                         filler

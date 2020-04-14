@@ -3,6 +3,7 @@ from typing import Type, List
 from flask_sqlalchemy import Model, SQLAlchemy
 
 from tdg.v1.builder.default import DefaultObjBuilder
+from tdg.v1.config import BaseModelConfigParser
 from tdg.v1.config.default import DefaultModelConfigRepo, DefaultModelConfigParser
 from tdg.v1.explainer.default import DefaultExplainerRepo
 from tdg.v1.filler.default import DefaultFillerTypeRepo
@@ -32,7 +33,7 @@ class Tdg(BaseTdg):
 
         model_config_repo = self.ModelConfigRepoCls()
         model_config_parser = self.ModelConfigParserCls(model_config_repo, self.FillerTypeRepoCls())
-        model_config_parser.parse_and_store(models, models_config)
+        self.parse_model_config(model_config_parser, models, models_config)
 
         super(Tdg, self).__init__(db,
                                   models,
@@ -41,3 +42,7 @@ class Tdg(BaseTdg):
                                   self.ObjTreeParserCls(),
                                   self.ObjBuilderCls(),
                                   auto_clean_when_teardown)
+
+    def parse_model_config(self, parser: BaseModelConfigParser, models: List[Type[Model]], models_config: dict):
+        """解析model配置"""
+        parser.parse_and_store(models, models_config)
