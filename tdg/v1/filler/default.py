@@ -88,10 +88,34 @@ class Constant(BaseFiller):
         return self.const
 
 
+class IncrString(IncrNumber):
+    """
+    含有自增量的填充字符串
+
+    filler = IncrString(prefix='project-', suffix='', zero_fill=2, base=1, step=1)
+    ---
+    01: project-01
+    02: project-02
+    ...
+    NN: project-NN
+    """
+
+    def __init__(self, prefix: str = '', suffix: str = '', zero_fill: int = 0, *args, **kwargs):
+        super(IncrString, self).__init__(*args, **kwargs)
+        self.prefix = prefix
+        self.suffix = suffix
+        self.fill_len = zero_fill
+
+    def generate(self):
+        num: int = super(IncrString, self).generate()
+        return self.prefix + str(num).zfill(self.fill_len) + self.suffix
+
+
 default_filler_types = [
     RandomString,
     RandomNumber,
     IncrNumber,
     DateTime,
     Constant,
+    IncrString,
 ]
