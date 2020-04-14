@@ -42,6 +42,9 @@ class BaseModelConfigRepo(abc.ABC):
     def get_model_conf(self, model_conf_name: str) -> ModelConfig:
         pass
 
+    @abc.abstractmethod
+    def get_model_conf_list(self) -> List[ModelConfig]:
+        pass
 
 class BaseModelConfigParser(abc.ABC):
 

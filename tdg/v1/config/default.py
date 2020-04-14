@@ -22,6 +22,9 @@ class DefaultModelConfigRepo(BaseModelConfigRepo):
     def get_model_conf(self, model_conf_name: str) -> ModelConfig:
         return self._store[model_conf_name]
 
+    def get_model_conf_list(self) -> List[ModelConfig]:
+        return list(self._store.values())
+
 
 class DefaultModelConfigParser(BaseModelConfigParser):
 

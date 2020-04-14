@@ -17,6 +17,9 @@ class BaseFiller(abc.ABC):
         self.index += 1
         return val
 
+    def reset(self):
+        self.index = 0
+
 
 class BaseFillerTypeRepo(abc.ABC):
 

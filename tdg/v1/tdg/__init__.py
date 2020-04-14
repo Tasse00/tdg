@@ -104,6 +104,12 @@ class BaseTdg:
         self.db.session().expire_on_commit = False
 
     def teardown(self):
+        # 重置填充器
+        model_conf_list = self.model_conf_repo.get_model_conf_list()
+        for model_conf in model_conf_list:
+            for field in model_conf.fields:
+                field.filler.reset()
+
         if self.auto_clean_when_teardown:
             self.clean_db()
 
