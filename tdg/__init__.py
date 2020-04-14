@@ -11,27 +11,33 @@ from tdg.v1.tree.default import DefaultObjTreeParser
 
 
 class Tdg(BaseTdg):
-    default_filler_type_repo = DefaultFillerTypeRepo()
-    default_explainer_repo = DefaultExplainerRepo()
-    default_obj_tree_parser = DefaultObjTreeParser()
-    default_obj_builder = DefaultObjBuilder()
+    FillerTypeRepoCls = DefaultFillerTypeRepo
+    ExplainerRepoCls = DefaultExplainerRepo
+    ObjTreeParserCls = DefaultObjTreeParser
+    ObjBuilderCls = DefaultObjBuilder
+    ModelConfigParserCls = DefaultModelConfigParser
+    ModelConfigRepoCls = DefaultModelConfigRepo
 
-    def __init__(self, db: SQLAlchemy, models: List[Type[Model]], models_config: dict,
+    def __init__(self,
+                 db: SQLAlchemy,
+                 models: List[Type[Model]],
+                 models_config: dict,
                  auto_clean_when_teardown: bool = True):
         """
         :param db: flask-sqlalchemy 实例
         :param models: Model对象列表，用于自动清理
-        :param models_config_desc: 字段填充规则的配置
-        :param auto_clean_in_ctx: 上下文使用时，自动清空数据库（不重建）
+        :param models_config: 字段填充规则的配置
+        :param auto_clean_when_teardown: 上下文使用时，自动清空数据库（不重建）
         """
-        model_config_repo = DefaultModelConfigRepo()
-        model_config_parser = DefaultModelConfigParser(model_config_repo, self.default_filler_type_repo)
+
+        model_config_repo = self.ModelConfigRepoCls()
+        model_config_parser = self.ModelConfigParserCls(model_config_repo, self.FillerTypeRepoCls())
         model_config_parser.parse_and_store(models, models_config)
 
         super(Tdg, self).__init__(db,
                                   models,
                                   model_config_repo,
-                                  self.default_explainer_repo,
-                                  self.default_obj_tree_parser,
-                                  self.default_obj_builder,
+                                  self.ExplainerRepoCls(),
+                                  self.ObjTreeParserCls(),
+                                  self.ObjBuilderCls(),
                                   auto_clean_when_teardown)
