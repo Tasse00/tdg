@@ -80,7 +80,7 @@ class DateTime(BaseFiller):
 
 class Constant(BaseFiller):
 
-    def __init__(self, const: Any):
+    def __init__(self, const: Any = ""):
         super(Constant, self).__init__()
         self.const = const
 
