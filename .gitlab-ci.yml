@@ -1,5 +1,9 @@
 image: python:3.7
 
+stages:
+  - test
+  - build
+
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
 
@@ -15,14 +19,24 @@ before_script:
   - source venv/bin/activate
   - pip install -r requirements.txt
 
-build:
-  stage: build
-
+test:
+  stage: test
   script:
     - pip install pytest pyyaml coverage -i https://pypi.douban.com/simple
     - coverage run -m pytest
     - coverage report
     - coverage html -d coverage.report
+  artifacts:
+    paths:
+      - coverage.report/*
+  only:
+    - master
+    - develop
+    - /^feat.*$/
+
+build:
+  stage: build
+  script:
     - python setup.py sdist
     - pip install twine -i https://pypi.douban.com/simple
     - twine upload --repository-url http://pypi.aengine.com.cn/ -u $AENGINE_PYPI_ACCOUNT -p $AENGINE_PYPI_PASSWORD dist/*

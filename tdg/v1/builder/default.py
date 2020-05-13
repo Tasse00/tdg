@@ -1,7 +1,7 @@
 from random import shuffle
 from typing import List, Dict, Tuple
 
-from flask_sqlalchemy import Model, SQLAlchemy
+from flask_sqlalchemy import Model
 
 from tdg.v1.builder import BaseObjBuilder
 from tdg.v1.config import BaseModelConfigRepo
@@ -33,7 +33,7 @@ class DefaultObjBuilder(BaseObjBuilder):
             for alias in alias_list
         }
 
-    def build(self, db: SQLAlchemy,
+    def build(self, session,
               model_conf_repo: BaseModelConfigRepo,
               explainer_repo: BaseExplainerRepo,
               existed_objs: Dict[str, Model],
@@ -90,8 +90,8 @@ class DefaultObjBuilder(BaseObjBuilder):
 
                 # 暂不处理异常
                 obj = model_cnf.model(**auto_filled_fields)
-                db.session.add(obj)
-                db.session.flush()
+                session.add(obj)
+                session.flush()
 
                 new_alias_models[alias] = obj
                 total_objs.append(obj)
@@ -107,5 +107,5 @@ class DefaultObjBuilder(BaseObjBuilder):
             rest_nodes = failed_nodes
             shuffle(rest_nodes)
 
-        db.session.commit()
+        session.commit()
         return new_alias_models, total_objs
