@@ -14,10 +14,10 @@ cache:
 
 before_script:
   - python3 -V  # Print out python version for debugging
-  - pip install virtualenv
+  - pip install virtualenv -i https://pypi.douban.com/simple
   - virtualenv venv
   - source venv/bin/activate
-  - pip install -r requirements.txt
+  - pip install -r requirements.txt -i https://pypi.douban.com/simple
 
 test:
   stage: test
