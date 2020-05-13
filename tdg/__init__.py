@@ -1,6 +1,7 @@
+from copy import deepcopy
 from typing import Type, List
 
-from flask_sqlalchemy import Model, SQLAlchemy
+from flask_sqlalchemy import Model
 
 from tdg.v1.builder.default import DefaultObjBuilder
 from tdg.v1.config import BaseModelConfigParser
@@ -20,12 +21,12 @@ class Tdg(BaseTdg):
     ModelConfigRepoCls = DefaultModelConfigRepo
 
     def __init__(self,
-                 db: SQLAlchemy,
+                 db,
                  models: List[Type[Model]],
-                 models_config: dict,
+                 models_config: dict = None,
                  auto_clean_when_teardown: bool = True):
         """
-        :param db: flask-sqlalchemy 实例
+        :param db: flask-sqlalchemy 实例 或者 session
         :param models: Model对象列表，用于自动清理
         :param models_config: 字段填充规则的配置
         :param auto_clean_when_teardown: 上下文使用时，自动清空数据库（不重建）
@@ -33,7 +34,11 @@ class Tdg(BaseTdg):
 
         model_config_repo = self.ModelConfigRepoCls()
         model_config_parser = self.ModelConfigParserCls(model_config_repo, self.FillerTypeRepoCls())
-        self.parse_model_config(model_config_parser, models, models_config)
+
+        # 兼容传入的是迭代器对象
+        models = deepcopy(list(models))
+
+        self.parse_model_config(model_config_parser, models, models_config or {})
 
         super(Tdg, self).__init__(db,
                                   models,
