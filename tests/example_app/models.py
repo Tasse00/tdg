@@ -6,6 +6,7 @@ db = SQLAlchemy()
 class School(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
+    enable = db.Column(db.Boolean, nullable=False)
 
 
 class Grade(db.Model):

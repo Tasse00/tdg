@@ -1,7 +1,7 @@
 from typing import List, Dict, Type
 
 from flask_sqlalchemy import Model
-from sqlalchemy import Column, Integer, String, BigInteger, Text, DateTime, JSON
+from sqlalchemy import Column, Integer, String, BigInteger, Text, DateTime, JSON, Boolean
 from sqlalchemy.orm import RelationshipProperty
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 
@@ -40,6 +40,7 @@ class DefaultModelConfigParser(BaseModelConfigParser):
                 Text: "RandomString",
                 DateTime: "DateTime",
                 JSON: "Constant",
+                Boolean: "BooleanValue",
             }[col.type.__class__], [], {})
 
     def parse(self, models: List[Type[Model]], models_conf: dict) -> List[ModelConfig]:

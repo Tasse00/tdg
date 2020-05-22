@@ -88,6 +88,24 @@ class Constant(BaseFiller):
         return self.const
 
 
+class BooleanValue(BaseFiller):
+
+    def __init__(self, random: bool = False, value: bool = True):
+        """
+        :param random: 是否是随机值，若设置为随机值则会忽略value参数
+        :param value: 非随机值情况下的常量值
+        """
+        super(BooleanValue, self).__init__()
+        self.random = random
+        self.value = value
+
+    def generate(self):
+        if self.random:
+            return random.choice([True, False])
+        else:
+            return self.value
+
+
 class IncrString(IncrNumber):
     """
     含有自增量的填充字符串
@@ -118,4 +136,5 @@ default_filler_types = [
     DateTime,
     Constant,
     IncrString,
+    BooleanValue,
 ]
